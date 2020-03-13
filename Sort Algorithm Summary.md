@@ -17,6 +17,7 @@
     - 归并排序
     - 堆排序
     - 冒泡排序
+
 在排序的最终结果里，元素之间的次序依赖于它们之间的比较。每个数都必须和其他数进行比较，才能确定自己的位置。  
 在冒泡排序之类的排序中，问题规模为n，又因为需要比较n次，所以平均时间复杂度为O(n²)。在归并排序、快速排序之类的排序中，问题规模通过分治法消减为logN次，所以时间复杂度平均O(nlogn)。
 比较排序的优势是，适用于各种规模的数据，也不在乎数据的分布，都能进行排序。可以说，比较排序适用于一切需要排序的情况。
@@ -24,6 +25,7 @@
     - 计数排序
     - 基数排序
     - 桶排序
+
 非比较排序是通过确定每个元素之前，应该有多少个元素来排序。针对数组arr，计算arr[i]之前有多少个元素，则唯一确定了arr[i]在排序后数组中的位置。    
 
 非比较排序只要确定每个元素之前的已有的元素个数即可，所有一次遍历即可解决。算法时间复杂度O(n)。
@@ -212,5 +214,134 @@ public static void shellSort(int[] array) {
 
 ```
 
+## 归并排序
+
+`最佳情况：T(n) = O(n) 最差情况：T(n) = O(nlogn) 平均情况：T(n) = O(nlogn)`
+
+和选择排序一样，归并排序的性能不受输入数据的影响，但表现比选择排序好的多，因为始终都是O(n log n）的时间复杂度。代价是需要额外的内存空间。
 
 
+算法描述
+- 把长度为n的输入序列分成两个长度为n/2的子序列；
+- 对这两个子序列分别采用归并排序；
+- 将两个排序好的子序列合并成一个最终的排序序列。
+
+```java
+/**
+ * Description: 归并排序
+ *
+ * @param array
+ * @return void
+ * @author JourWon
+ * @date 2019/7/11 23:37
+ */
+public static void mergeSort(int[] array) {
+	if (array == null || array.length <= 1) {
+		return;
+	}
+
+	sort(array, 0, array.length - 1);
+}
+
+private static void sort(int[] array, int left, int right) {
+	if (left == right) {
+		return;
+	}
+	int mid = left + ((right - left) >> 1);
+	// 对左侧子序列进行递归排序
+	sort(array, left, mid);
+	// 对右侧子序列进行递归排序
+	sort(array, mid + 1, right);
+	// 合并
+	merge(array, left, mid, right);
+}
+
+private static void merge(int[] array, int left, int mid, int right) {
+	int[] temp = new int[right - left + 1];
+	int i = 0;
+	int p1 = left;
+	int p2 = mid + 1;
+	// 比较左右两部分的元素，哪个小，把那个元素填入temp中
+	while (p1 <= mid && p2 <= right) {
+		temp[i++] = array[p1] < array[p2] ? array[p1++] : array[p2++];
+	}
+	// 上面的循环退出后，把剩余的元素依次填入到temp中
+	// 以下两个while只有一个会执行，因为跳出循环的时候有一个不满足跳出，所以下方只有一个执行
+	while (p1 <= mid) {
+		temp[i++] = array[p1++];
+	}
+	while (p2 <= right) {
+		temp[i++] = array[p2++];
+	}
+	// 把最终的排序的结果复制给原数组
+	for (i = 0; i < temp.length; i++) {
+		array[left + i] = temp[i];
+	}
+}
+
+
+```
+
+## 快速排序
+
+快速排序的基本思想：通过一趟排序将待排记录分隔成独立的两部分，其中一部分记录的关键字均比另一部分的关键字小，则可分别对这两部分记录继续进行排序，以达到整个序列有序。
+
+算法描述
+
+快速排序使用分治法来把一个串（list）分为两个子串（sub-lists）。具体算法描述如下：
+
+- 从数列中挑出一个元素，称为 “基准”（pivot）；
+- 重新排序数列，所有元素比基准值小的摆放在基准前面，所有元素比基准值大的摆在基准的后面（相同的数可以到任一边）。在这个分区退出之后，该基准就处于数列的中间位置。这个称为分区（partition）操作；
+- 递归地（recursive）把小于基准值元素的子数列和大于基准值元素的子数列排序。
+
+```java
+
+/**
+ * Description: 快速排序
+ *
+ * @param array
+ * @return void
+ * @author JourWon
+ * @date 2019/7/11 23:39
+ */
+public static void quickSort(int[] array) {//重载
+	quickSort(array, 0, array.length - 1);
+}
+
+
+private static void quickSort(int[] array, int left, int right) {
+	if (array == null || left >= right || array.length <= 1) {
+		return;
+	}
+	int mid = partition(array, left, right);
+	quickSort(array, left, mid);
+	quickSort(array, mid + 1, right);
+}
+
+
+private static int partition(int[] array, int left, int right) {
+	int temp = array[left];//定义pivot
+	while (right > left) {
+		// 先判断基准数和后面的数依次比较
+		while (temp <= array[right] && left < right) {
+			--right;
+		}
+		// 当基准数大于了 arr[left]，则填坑
+		if (left < right) {
+			array[left] = array[right];
+			++left;
+		}
+		// 现在是 arr[right] 需要填坑了
+		while (temp >= array[left] && left < right) {
+			++left;
+		}
+		if (left < right) {
+			array[right] = array[left];
+			--right;
+		}
+	}
+	array[left] = temp;
+	return left;
+}
+
+```
